@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.2",
+  "parameters": {
+    "vmIPPublicDnsNamePrefix": {
+      "value":"<CHANGE_ME>"
+    },
+    "vmAdminUserName": {
+      "value":"<CHANGE_ME>"
+    },
+    "vmAdminPassword": {
+      "value":"<CHANGE_ME>"
+    },
+    "vmSize": {
+      "value": "Standard_B2ms"
+    },
+    "OSdiskSizeGB": {
+      "value": "256"
+    }    
+  }
+}
