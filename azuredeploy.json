@@ -40,6 +40,7 @@
        "allowedValues": [
         "Standard_B2ms",
         "Standard_D2s_v4",
+        "Standard_D4s_v4",
         "Standard_E2as_v4",
         "Standard_B4ms"
       ],
@@ -49,7 +50,7 @@
     },
     "OSdiskSizeGB":{
        "type": "string",
-       "defaultValue": "128",
+       "defaultValue": "256",
        "allowedValues": [
         "64",
         "128",

@@ -12,10 +12,10 @@
       "value":"<CHANGE_ME>"
     },
     "vmSize": {
-      "value": "Standard_B2ms"
+      "value": "Standard_D4s_v4"
     },
     "OSdiskSizeGB": {
-      "value": "256"
+      "value": "512"
     }    
   }
 }
