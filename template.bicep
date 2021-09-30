@@ -1,3 +1,15 @@
+/*
+* Description:      Deploys a Windows 10 Virtual machine with Visual studio 2019 and runs a post deployment chocolately script to install other bits - takes 30mins or so to provision.
+* Author:           asaikovski@outlook.com
+* Version:          1.0
+*
+* Input Parameters:
+*                   'vmAdminUserName'         - VM Admin username
+*                   'vmAdminPassword'         - VM Admin password
+*                   'vmIPPublicDnsNamePrefix' - Public DNS Name - in format - <DNSNAME>.<REGION>.cloudapp.azure.com
+*/
+
+
 @description('VM admin user name')
 param vmAdminUserName string
 
@@ -22,34 +34,57 @@ param location string = resourceGroup().location
   'Standard_E2as_v4'
   'Standard_B4ms'
 ])
-param vmSize string = 'Standard_B2ms'
+param vmSize string = 'Standard_D2s_v4'
 
 @description('OS Disk Size')
 @allowed([
-  '64'
-  '128'
-  '256'
-  '512'
-  '1024'
+  64
+  128
+  256
+  512
+  1024
 ])
-param OSdiskSizeGB string = '256'
+param OSdiskSizeGB int = 256
+
+@description('OS Disk SKU')
+@allowed([
+  'Standard_LRS'
+  'StandardSSD_LRS'
+  'Premium_LRS'
+])
+param storageAccountDiskSku string = 'StandardSSD_LRS'
+
+@description('OS Disk Caching')
+@allowed([
+  'None'
+  'ReadOnly'
+  'ReadWrite'
+])
+param storageAccountDiskCaching string = 'None'
+
 param virtualMachineExtensionCustomScriptUri string = 'https://raw.githubusercontent.com/AaronSaikovski/chocolatelyinstallers/master/chocolately-install.ps1'
 
 var vmName_var = '${substring(vmVisualStudioVersion, 0, 8)}vm'
 var vnet01Prefix = '10.0.0.0/16'
-var vnet01Subnet1Name = 'Subnet-1'
-var vnetName_var = 'vnet'
+var vnet01Subnet1Name = '${vmName_var}-sn'
+var vnetName_var = '${vmName_var}-vnet'
 var vnet01Subnet1Prefix = '10.0.0.0/24'
 var vmImagePublisher = 'MicrosoftVisualStudio'
 var vmImageOffer = 'visualstudio2019latest'
 var vmSubnetRef = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName_var, vnet01Subnet1Name)
 var vmNicName_var = '${vmName_var}-nic'
-var vmIP01Name_var = 'VMIP01'
+var vmIP01Name_var = '${vmName_var}-pip01'
 var networkSecurityGroupName_var = '${vnet01Subnet1Name}-nsg'
 
-resource networkSecurityGroupName 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
+
+//Dynamically tags subnets from JSON file
+var tags = json(loadTextContent('./tags.json'))
+
+//NSG
+resource networkSecurityGroupName 'Microsoft.Network/networkSecurityGroups@2021-02-01' = {
   name: networkSecurityGroupName_var
   location: location
+  tags:tags
   properties: {
     securityRules: [
       {
@@ -69,12 +104,11 @@ resource networkSecurityGroupName 'Microsoft.Network/networkSecurityGroups@2020-
   }
 }
 
-resource vnetName 'Microsoft.Network/virtualNetworks@2020-07-01' = {
+//Vnet
+resource vnetName 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: vnetName_var
   location: location
-  tags: {
-    displayName: 'VNet01'
-  }
+  tags:tags
   properties: {
     addressSpace: {
       addressPrefixes: [
@@ -95,12 +129,11 @@ resource vnetName 'Microsoft.Network/virtualNetworks@2020-07-01' = {
   }
 }
 
-resource vmNicName 'Microsoft.Network/networkInterfaces@2020-07-01' = {
+//VM NIC
+resource vmNicName 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   name: vmNicName_var
   location: location
-  tags: {
-    displayName: 'VMNic01'
-  }
+  tags:tags
   properties: {
     ipConfigurations: [
       {
@@ -122,12 +155,11 @@ resource vmNicName 'Microsoft.Network/networkInterfaces@2020-07-01' = {
   ]
 }
 
-resource vmName 'Microsoft.Compute/virtualMachines@2020-06-01' = {
+//Virtual Machine
+resource vmName 'Microsoft.Compute/virtualMachines@2021-04-01' = {
   name: vmName_var
   location: location
-  tags: {
-    displayName: 'VM01'
-  }
+  tags:tags
   properties: {
     hardwareProfile: {
       vmSize: vmSize
@@ -145,10 +177,10 @@ resource vmName 'Microsoft.Compute/virtualMachines@2020-06-01' = {
         version: 'latest'
       }
       osDisk: {
-        caching: 'None'
+        caching: storageAccountDiskCaching
         createOption: 'FromImage'
         managedDisk: {
-          storageAccountType: 'StandardSSD_LRS'
+          storageAccountType: storageAccountDiskSku
         }
         diskSizeGB: OSdiskSizeGB
       }
@@ -164,10 +196,12 @@ resource vmName 'Microsoft.Compute/virtualMachines@2020-06-01' = {
   }
 }
 
-resource vmName_installcustomscript 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+//custom script extension install
+resource vmName_installcustomscript 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' = {
   parent: vmName
   name: 'installcustomscript'
   location: location
+  tags:tags
   properties: {
     publisher: 'Microsoft.Compute'
     type: 'CustomScriptExtension'
@@ -184,12 +218,11 @@ resource vmName_installcustomscript 'Microsoft.Compute/virtualMachines/extension
   }
 }
 
-resource vmIP01Name 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
+//public IP
+resource vmIP01Name 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   name: vmIP01Name_var
   location: location
-  tags: {
-    displayName: 'VMIP01'
-  }
+  tags:tags
   properties: {
     publicIPAllocationMethod: 'Static'
     dnsSettings: {

@@ -1,0 +1,21 @@
+#!/bin/sh
+rsg="asaikovski-dev-resources"
+loc="Australia East"
+
+#Params
+AdminUserName=''
+AdminPassword=''
+PublicDnsNamePrefix=''
+
+#load tags from JSON
+#tags=$(jq --compact-output --raw-output '.' './tags.json')
+
+#Resource group create
+az group create --name $rsg --location $loc #--tags $tags
+#az group update --name $rsg --tags=$tags
+
+#Deploy bicep file
+az deployment group create --resource-group $rsg --template-file "template.bicep" --parameters vmAdminUserName=$AdminUserName vmAdminPassword=$AdminPassword vmIPPublicDnsNamePrefix=$PublicDnsNamePrefix
+
+#Delete resource group
+#az group delete --name $rsg --yes --no-wait
