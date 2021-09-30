@@ -1,5 +1,5 @@
 #!/bin/sh
-rsg="asaikovski-dev-resources"
+rsg="<CHANGE-ME>"
 loc="Australia East"
 
 #Params

@@ -8,7 +8,7 @@ $subscriptionId     = "<CHANGE_ME>"
 $resourceGroupName  = "<CHANGE_ME>"
 $location           = "australiaeast"
 
-#Get Tags from Json file
+#Get Tags from Json file and parse as a hashtable
 $tags = Get-Content 'tags.json' | ConvertFrom-Json -AsHashtable
 
 #Select Subscription
@@ -19,7 +19,7 @@ Select-AzSubscription -SubscriptionId $subscriptionId
 New-AzResourceGroup -Name $resourceGroupName -Location $location -Tag $tags
 
 #Deploy bicep template using powershell
-New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "template.bicep"  -AsJob
+New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "template.bicep" # -AsJob
 
 #Remove Resource Group
 #Syntax

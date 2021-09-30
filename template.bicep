@@ -8,8 +8,6 @@
 *                   'vmAdminPassword'         - VM Admin password
 *                   'vmIPPublicDnsNamePrefix' - Public DNS Name - in format - <DNSNAME>.<REGION>.cloudapp.azure.com
 */
-
-
 @description('VM admin user name')
 param vmAdminUserName string
 
@@ -27,13 +25,13 @@ param vmIPPublicDnsNamePrefix string
 param location string = resourceGroup().location
 
 @description('VM Size')
-@allowed([
+/*@allowed([
   'Standard_B2ms'
   'Standard_D2s_v4'
   'Standard_D4s_v4'
   'Standard_E2as_v4'
   'Standard_B4ms'
-])
+])*/
 param vmSize string = 'Standard_D2s_v4'
 
 @description('OS Disk Size')
