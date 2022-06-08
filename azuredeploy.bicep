@@ -47,6 +47,7 @@ var vmNicName_var = '${vmName_var}-nic'
 var vmIP01Name_var = 'VMIP01'
 var networkSecurityGroupName_var = '${vnet01Subnet1Name}-nsg'
 
+
 resource networkSecurityGroupName 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   name: networkSecurityGroupName_var
   location: location
